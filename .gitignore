@@ -29,3 +29,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Node.js / frontend
+node_modules/
+dist/
+.next/
