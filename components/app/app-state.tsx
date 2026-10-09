@@ -31,7 +31,7 @@ type Action =
 
 function initState(): State {
   return {
-    view: "overview",
+    view: "landing",
     dataset: initialDataset,
     assessment: assess(initialDataset, SIMULATED_BASE_TIME),
     previousAssessment: null,

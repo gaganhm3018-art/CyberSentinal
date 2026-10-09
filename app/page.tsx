@@ -3,17 +3,39 @@
 import { AppStateProvider, useAppState } from "@/components/app/app-state"
 import { Sidebar } from "@/components/app/sidebar"
 import { Topbar } from "@/components/app/topbar"
+import { LandingView } from "@/components/views/landing-view"
+import { RiskAssessmentView } from "@/components/views/risk-assessment-view"
 import { OverviewView } from "@/components/views/overview-view"
 import { ExplorerView } from "@/components/views/explorer-view"
 import { AnalystView } from "@/components/views/analyst-view"
 import { InvestmentsView } from "@/components/views/investments-view"
 import { GapsView } from "@/components/views/gaps-view"
 import { ActivityView } from "@/components/views/activity-view"
+import { ReportUploadView } from "@/components/views/report-upload-view"
+import { AgentSimulationView } from "@/components/views/agent-simulation-view"
 import { SettingsView } from "@/components/views/settings-view"
 
 function DashboardContent() {
   const { view } = useAppState()
 
+  // Minimal entry layout: render without sidebar or topbar
+  if (
+    view === "landing" ||
+    view === "risk-assessment" ||
+    view === "report-upload" ||
+    view === "agent-simulation"
+  ) {
+    return (
+      <main className="min-h-svh w-full bg-background text-foreground">
+        {view === "landing" && <LandingView />}
+        {view === "risk-assessment" && <RiskAssessmentView />}
+        {view === "report-upload" && <ReportUploadView />}
+        {view === "agent-simulation" && <AgentSimulationView />}
+      </main>
+    )
+  }
+
+  // Existing dashboard layout: render with full sidebar and topbar
   return (
     <div className="flex min-h-svh bg-background text-foreground">
       <Sidebar />

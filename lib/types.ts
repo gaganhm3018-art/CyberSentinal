@@ -127,4 +127,15 @@ export interface ActivityEvent {
   overallChange?: { before: number; after: number }
 }
 
-export type ViewId = "overview" | "explorer" | "analyst" | "investments" | "gaps" | "activity" | "settings"
+export type ViewId =
+  | "landing"
+  | "risk-assessment"
+  | "overview"
+  | "explorer"
+  | "analyst"
+  | "investments"
+  | "gaps"
+  | "activity"
+  | "settings"
+  | "report-upload"
+  | "agent-simulation"
