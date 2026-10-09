@@ -1,29 +1,42 @@
-import { AlertsTable } from "@/components/dashboard/alerts-table"
-import { Header } from "@/components/dashboard/header"
-import { SeverityBreakdown } from "@/components/dashboard/severity-breakdown"
-import { Sidebar } from "@/components/dashboard/sidebar"
-import { StatCards } from "@/components/dashboard/stat-cards"
-import { ThreatChart } from "@/components/dashboard/threat-chart"
+"use client"
 
-export default function Home() {
+import { AppStateProvider, useAppState } from "@/components/app/app-state"
+import { Sidebar } from "@/components/app/sidebar"
+import { Topbar } from "@/components/app/topbar"
+import { OverviewView } from "@/components/views/overview-view"
+import { ExplorerView } from "@/components/views/explorer-view"
+import { AnalystView } from "@/components/views/analyst-view"
+import { InvestmentsView } from "@/components/views/investments-view"
+import { GapsView } from "@/components/views/gaps-view"
+import { ActivityView } from "@/components/views/activity-view"
+import { SettingsView } from "@/components/views/settings-view"
+
+function DashboardContent() {
+  const { view } = useAppState()
+
   return (
-    <div className="flex min-h-svh">
+    <div className="flex min-h-svh bg-background text-foreground">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header />
-        <main className="flex flex-col gap-6 p-4 md:p-8">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-semibold tracking-tight text-balance">Security overview</h1>
-            <p className="text-sm text-muted-foreground">Real-time posture across endpoints, network, and cloud.</p>
-          </div>
-          <StatCards />
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <ThreatChart />
-            <SeverityBreakdown />
-          </div>
-          <AlertsTable />
+        <Topbar />
+        <main className="flex-1 p-4 lg:p-6">
+          {view === "overview" && <OverviewView />}
+          {view === "explorer" && <ExplorerView />}
+          {view === "analyst" && <AnalystView />}
+          {view === "investments" && <InvestmentsView />}
+          {view === "gaps" && <GapsView />}
+          {view === "activity" && <ActivityView />}
+          {view === "settings" && <SettingsView />}
         </main>
       </div>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <AppStateProvider>
+      <DashboardContent />
+    </AppStateProvider>
   )
 }

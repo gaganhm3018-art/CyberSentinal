@@ -1,4 +1,5 @@
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 })
+const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
 const dateTime = new Intl.DateTimeFormat("en-IN", {
   day: "2-digit",
   month: "short",
@@ -10,6 +11,10 @@ const dateTime = new Intl.DateTimeFormat("en-IN", {
 
 export function formatINR(value: number) {
   return inr.format(value)
+}
+
+export function formatCurrency(value: number) {
+  return usd.format(value)
 }
 
 export function formatDateTime(iso: string) {
