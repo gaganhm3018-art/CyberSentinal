@@ -15,6 +15,8 @@ const CATEGORIES: { key: RiskCategory; color: string }[] = [
 
 export function RiskDistribution() {
   const { assessment } = useAppState()
+
+  // Calculate asset counts from current asset inventory and category thresholds
   const data = useMemo(
     () =>
       CATEGORIES.map((c) => ({
@@ -25,12 +27,21 @@ export function RiskDistribution() {
     [assessment.assetRisks],
   )
 
+  const totalAssets = assessment.assetRisks.length
+
   return (
-    <Panel title="Risk distribution" description={`${assessment.assetRisks.length} assets by risk category`}>
-      <div className="h-44" role="img" aria-label={data.map((d) => `${d.category}: ${d.count}`).join(", ")}>
+    <Panel
+      title="Asset Risk Distribution"
+      description={`${totalAssets} monitored assets grouped by risk level`}
+    >
+      <div
+        className="h-44"
+        role="img"
+        aria-label={`Asset risk distribution: ${data.map((d) => `${d.category}: ${d.count}`).join(", ")} (${totalAssets} total assets)`}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
-            <XAxis type="number" allowDecimals={false} hide />
+            <XAxis type="number" allowDecimals={false} hide domain={[0, "auto"]} />
             <YAxis
               type="category"
               dataKey="category"
@@ -49,7 +60,7 @@ export function RiskDistribution() {
               }}
               labelStyle={{ color: "var(--foreground)" }}
               itemStyle={{ color: "var(--muted-foreground)" }}
-              formatter={(v) => [`${v} assets`, "Count"]}
+              formatter={(v) => [`${v} asset${Number(v) === 1 ? "" : "s"}`, "Count"]}
             />
             <Bar dataKey="count" radius={[0, 3, 3, 0]} barSize={18}>
               {data.map((d) => (
@@ -73,3 +84,4 @@ export function RiskDistribution() {
     </Panel>
   )
 }
+

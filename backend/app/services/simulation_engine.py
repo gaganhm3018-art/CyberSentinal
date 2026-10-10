@@ -41,7 +41,7 @@ DEMO_ASSETS: Dict[str, Dict[str, Any]] = {
         "baseline_score": 88.0,
         "controls": {"mfa": "Missing", "edr": "Partial", "patching": "Missing", "segmentation": "Missing", "backup": "Active"},
         "vulnerabilities": ["Kerberos ticket delegation vulnerability", "Weak administrative password policy"],
-        "connected_assets": ["Customer Database", "Corporate VPN Concentrator", "Workstation Subnet"],
+        "connected_assets": ["Customer Database", "Corporate VPN Concentrator", "Developer Workstation"],
     },
     "a-pay-api": {
         "id": "a-pay-api",
@@ -63,7 +63,84 @@ DEMO_ASSETS: Dict[str, Dict[str, Any]] = {
         "baseline_score": 70.0,
         "controls": {"mfa": "Partial", "edr": "Unavailable", "patching": "Active", "segmentation": "Partial", "backup": "Active"},
         "vulnerabilities": ["Outdated firmware authentication flaw", "Session token reuse vulnerability"],
-        "connected_assets": ["Corporate Identity Server", "Internal Network Subnet"],
+        "connected_assets": ["Corporate Identity Server", "HR Application Server"],
+    },
+    "a-backup": {
+        "id": "a-backup",
+        "name": "Backup Infrastructure",
+        "type": "Backup System",
+        "criticality": "Critical",
+        "exposure": "Internal",
+        "baseline_score": 68.0,
+        "controls": {"mfa": "Partial", "edr": "Missing", "patching": "Partial", "segmentation": "Partial", "backup": "Missing"},
+        "vulnerabilities": ["Unsegmented snapshot replication share", "Default credentials on storage appliance"],
+        "connected_assets": ["Customer Database", "Payment Production Server"],
+    },
+    "a-partner-hub": {
+        "id": "a-partner-hub",
+        "name": "Partner Integration Hub",
+        "type": "Integration Hub",
+        "criticality": "Critical",
+        "exposure": "Partner network",
+        "baseline_score": 65.0,
+        "controls": {"mfa": "Active", "edr": "Partial", "patching": "Partial", "segmentation": "Missing", "backup": "Active"},
+        "vulnerabilities": ["Third-party API gateway key leakage", "Unrestricted cross-domain CORS policy"],
+        "connected_assets": ["Payment API Gateway", "Customer Database"],
+    },
+    "a-hr-app": {
+        "id": "a-hr-app",
+        "name": "HR Application Server",
+        "type": "Application Server",
+        "criticality": "High",
+        "exposure": "Internal",
+        "baseline_score": 58.0,
+        "controls": {"mfa": "Missing", "edr": "Partial", "patching": "Missing", "segmentation": "Partial", "backup": "Active"},
+        "vulnerabilities": ["SQL Injection on employee records endpoint", "Outdated Java runtime library"],
+        "connected_assets": ["Corporate Identity Server", "Customer Database"],
+    },
+    "a-mail": {
+        "id": "a-mail",
+        "name": "Email Gateway",
+        "type": "Web Server",
+        "criticality": "High",
+        "exposure": "Internet-facing",
+        "baseline_score": 55.0,
+        "controls": {"mfa": "Active", "edr": "Active", "patching": "Active", "segmentation": "Partial", "backup": "Active"},
+        "vulnerabilities": ["DMARC policy in monitor-only mode", "Legacy SMTP relay authentication"],
+        "connected_assets": ["Corporate Identity Server"],
+    },
+    "a-dev-ws": {
+        "id": "a-dev-ws",
+        "name": "Developer Workstation",
+        "type": "Workstation",
+        "criticality": "Medium",
+        "exposure": "Internal",
+        "baseline_score": 45.0,
+        "controls": {"mfa": "Partial", "edr": "Missing", "patching": "Partial", "segmentation": "Missing", "backup": "Partial"},
+        "vulnerabilities": ["Hardcoded AWS credentials in local dotfiles", "Unsigned driver execution enabled"],
+        "connected_assets": ["Payment Production Server", "Corporate Identity Server"],
+    },
+    "a-marketing": {
+        "id": "a-marketing",
+        "name": "Marketing Website",
+        "type": "Web Server",
+        "criticality": "Low",
+        "exposure": "Internet-facing",
+        "baseline_score": 38.0,
+        "controls": {"mfa": "Active", "edr": "Partial", "patching": "Partial", "segmentation": "Active", "backup": "Active"},
+        "vulnerabilities": ["Outdated WordPress plugin", "Exposed author enumeration endpoint"],
+        "connected_assets": ["Internal Wiki"],
+    },
+    "a-wiki": {
+        "id": "a-wiki",
+        "name": "Internal Wiki",
+        "type": "Web Server",
+        "criticality": "Low",
+        "exposure": "Internal",
+        "baseline_score": 25.0,
+        "controls": {"mfa": "Active", "edr": "Active", "patching": "Partial", "segmentation": "Active", "backup": "Active"},
+        "vulnerabilities": ["Stored XSS on internal comment page"],
+        "connected_assets": ["Developer Workstation"],
     },
 }
 
@@ -100,7 +177,6 @@ class AgentSimulationService:
 
         # Baseline score calculation
         base_score = float(asset.get("baseline_score", 60.0))
-        simulated_score = base_score
 
         if "vulnerab" in scenario or scenario == "vulnerability_exploitation":
             # Stage 1: Initial Access / Recon
@@ -153,6 +229,14 @@ class AgentSimulationService:
                 success_likelihood=min(0.85, round(0.60 * intensity_factor, 2)),
                 evidence="Session reuse vulnerability detected; no anomaly alert raised."
             ))
+            stages.append(AttackStage(
+                stage_number=3,
+                name="Administrative Pivot & Persistence",
+                description=f"Adversary uses stolen token to access {', '.join(asset.get('connected_assets', ['internal resources']))}.",
+                technique="T1078 - Valid Accounts",
+                success_likelihood=min(0.80, round(0.55 * intensity_factor, 2)),
+                evidence=f"EDR status is '{asset['controls'].get('edr', 'Partial')}'; account anomaly uncontained."
+            ))
             simulated_score = min(100.0, round(base_score + (10.0 * intensity_factor), 1))
             exploit_factors.append("Incomplete MFA enforcement")
             exploit_factors.append("Weak session timeout controls")
@@ -174,6 +258,14 @@ class AgentSimulationService:
                 technique="T1068 - Exploitation for Privilege Escalation",
                 success_likelihood=min(0.85, round(0.65 * intensity_factor, 2)),
                 evidence=f"Identity controls in '{asset['controls'].get('mfa', 'Missing')}' state; elevated token granted."
+            ))
+            stages.append(AttackStage(
+                stage_number=3,
+                name="Defense Evasion & Credential Dumping",
+                description="Adversary disables audit logging and extracts local hashes.",
+                technique="T1003 - OS Credential Dumping",
+                success_likelihood=min(0.80, round(0.60 * intensity_factor, 2)),
+                evidence=f"Patch status is '{asset['controls'].get('patching', 'Missing')}'; kernel exploits viable."
             ))
             simulated_score = min(100.0, round(base_score + (15.0 * intensity_factor), 1))
             exploit_factors.append("Excessive administrative privileges")

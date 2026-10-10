@@ -2,23 +2,15 @@
 
 import { useState } from "react"
 import {
-  AlertCircle,
-  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Bot,
-  BrainCircuit,
   CheckCircle2,
-  ChevronRight,
   Flame,
   Info,
-  Layers,
   Loader2,
-  Lock,
-  RefreshCw,
   RotateCcw,
   Server,
-  Shield,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
@@ -29,7 +21,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAppState } from "@/components/app/app-state"
-import { LevelBadge, scoreBarColor, scoreColor } from "@/components/app/badges"
 
 interface AttackStage {
   stage_number: number

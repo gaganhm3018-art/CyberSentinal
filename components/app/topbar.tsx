@@ -11,7 +11,20 @@ import { Logo, SidebarNav } from "./sidebar"
 import { ActivityList } from "./activity-list"
 
 export function Topbar() {
-  const { view, assessment, isAssessing, isStale, runAssessment, unread, markRead, activity, navigate } = useAppState()
+  const {
+    view,
+    assessment,
+    isAssessing,
+    isStale,
+    runAssessment,
+    autoRefreshEnabled,
+    nextAssessmentSeconds,
+    toggleAutoRefresh,
+    unread,
+    markRead,
+    activity,
+    navigate,
+  } = useAppState()
   const [menuOpen, setMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const item = NAV_ITEMS.find((n) => n.id === view) ?? NAV_ITEMS[0]
@@ -32,10 +45,31 @@ export function Topbar() {
           <Logo />
         </div>
         <div className="ml-auto flex items-center gap-2">
+          {/* Auto-Refresh Status Pill */}
+          <button
+            type="button"
+            onClick={toggleAutoRefresh}
+            title={autoRefreshEnabled ? "Click to pause auto-assessment timer" : "Click to resume auto-assessment timer"}
+            className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-mono transition-colors hover:bg-muted/40"
+          >
+            <span
+              className={`size-2 rounded-full ${
+                autoRefreshEnabled ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"
+              }`}
+            />
+            <span className="text-[11px] text-foreground">
+              Auto-refresh {autoRefreshEnabled ? "ON" : "OFF"}
+            </span>
+            {autoRefreshEnabled && (
+              <span className="text-[10px] text-muted-foreground">({nextAssessmentSeconds}s)</span>
+            )}
+          </button>
+
           <span className="hidden items-center gap-1.5 rounded-md border border-dashed border-warning/40 px-2 py-1 text-xs text-warning sm:inline-flex">
             <FlaskConical className="size-3.5" aria-hidden="true" />
             Simulated environment
           </span>
+
           <Button
             variant="ghost"
             size="icon"
@@ -63,10 +97,20 @@ export function Topbar() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="text-xs leading-tight text-muted-foreground" aria-live="polite">
-            <span className="block">Last evaluation</span>
-            <span className="font-mono text-foreground">{formatDateTime(assessment.evaluatedAt)}</span>
-            {isStale ? <span className="block text-warning">Data changed — re-run needed</span> : null}
+            <div className="flex items-center gap-1">
+              <span>Last evaluation:</span>
+              <span className="font-mono text-foreground font-medium">{formatDateTime(assessment.evaluatedAt)}</span>
+            </div>
+            {autoRefreshEnabled ? (
+              <span className="block text-[11px] text-muted-foreground">
+                Next cycle in <strong className="font-mono text-foreground">{nextAssessmentSeconds}s</strong>
+              </span>
+            ) : (
+              <span className="block text-[11px] text-warning">Auto-cycle paused</span>
+            )}
+            {isStale ? <span className="block text-warning font-medium">Telemetry changed — re-run queued</span> : null}
           </div>
+
           <Button onClick={runAssessment} disabled={isAssessing} size="lg">
             {isAssessing ? <Loader2 className="animate-spin" aria-hidden="true" /> : <RefreshCw aria-hidden="true" />}
             {isAssessing ? "Assessing…" : "Run Risk Assessment"}
